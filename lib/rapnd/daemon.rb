@@ -1,6 +1,7 @@
 require 'redis'
 require 'openssl'
 require 'socket'
+require 'active_support/core_ext/hash'
 require 'active_support/ordered_hash'
 require 'active_support/json'
 require 'base64'
