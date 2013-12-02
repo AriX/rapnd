@@ -21,7 +21,7 @@ module Rapnd
     end
     
     def json_payload
-      j = ActiveSupport::JSON.encode(payload)
+      j = payload.to_json.force_encoding("utf-8")
       raise "The payload #{j} is larger than allowed: #{j.length}" if j.size > 256
       j
     end
