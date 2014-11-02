@@ -22,13 +22,28 @@ module Rapnd
     
     def json_payload
       j = payload.to_json.force_encoding("utf-8")
-      # raise "The payload #{j} is larger than allowed: #{j.length}" if j.size > 256
+      # raise "The payload #{j} is larger than allowed: #{j.length}" if j.size > 2048
       j
+    end
+    
+    def item(id, size, item, encoding)
+        [id, size, item].pack("Cn" + encoding)
     end
     
     def to_bytes
       j = json_payload
-      [0, 0, 32, self.device_token, 0, j.bytesize, j].pack("cccH*cca*").force_encoding('ASCII-8BIT')
+      devicetoken_item = self.item(1, 32, self.device_token, "H*")
+      payload_item = self.item(2, j.bytesize, j, "a*").force_encoding('ASCII-8BIT')
+      notificationidentifier_item = self.item(3, 4, 0, "N")
+      expiration_item = self.item(4, 4, 31536000, "N")
+      priority_item = self.item(5, 1, 10, "C")
+      
+      frame = [devicetoken_item, payload_item, notificationidentifier_item, expiration_item, priority_item].pack("a*a*a*a*a*").force_encoding('ASCII-8BIT')
+      
+      command = 2
+      frame_length = frame.bytesize
+      
+      [command, frame_length, frame].pack("CNa*").force_encoding('ASCII-8BIT')
     end
   end
 end
